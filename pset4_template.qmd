@@ -61,7 +61,7 @@ from shapely import Polygon, Point
 ```
 **Question 1.2**
 ```{python}
-pos2016=pd.read_csv(r'C:\Users\laine\OneDrive\Documents\Harris\Fall 2024\Python II\pos2016.csv')
+pos2016=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2016.csv")
 ```
 
 ```{python}
@@ -82,7 +82,7 @@ Definitive Healthcare article: https://www.definitivehc.com/blog/how-many-hospit
 
 ```{python}
 # import and subset pos2017
-pos2017=pd.read_csv(r'C:\Users\laine\OneDrive\Documents\Harris\Fall 2024\Python II\pos2017.csv')
+pos2017=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2017.csv")
 short_term_hos_2017=pos2017[pos2017['PRVDR_CTGRY_CD']==1]
 short_term_hos_2017=short_term_hos_2017[short_term_hos_2017['PRVDR_CTGRY_SBTYP_CD']==1]
 short_term_hos_2017['year']=2017
@@ -91,7 +91,7 @@ print(len(short_term_hos_2017))
 
 ```{python}
 # import and subset pos2018
-pos2018=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\Harris\Fall 2024\Python II\pos2018.csv")
+pos2018=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2018.csv")
 short_term_hos_2018=pos2018[pos2018['PRVDR_CTGRY_CD']==1]
 short_term_hos_2018=short_term_hos_2018[short_term_hos_2018['PRVDR_CTGRY_SBTYP_CD']==1]
 short_term_hos_2018['year']=2018
@@ -100,7 +100,7 @@ print(len(short_term_hos_2018))
 
 ```{python}
 # import and subset pos2018
-pos2019=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\Harris\Fall 2024\Python II\pos2019.csv")
+pos2019=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2019.csv")
 short_term_hos_2019=pos2019[pos2019['PRVDR_CTGRY_CD']==1]
 short_term_hos_2019=short_term_hos_2019[short_term_hos_2019['PRVDR_CTGRY_SBTYP_CD']==1]
 short_term_hos_2019['year']=2019
@@ -118,7 +118,7 @@ full_df=pd.concat([short_term_hos_2016,short_term_hos_2017,short_term_hos_2018,s
 alt.data_transformers.disable_max_rows()
 plot_1_3=alt.Chart(full_df, title="Number of Short Term Hospitals by Year").mark_bar().encode(
     alt.X('year:Q'),
-    alt.Y('count(FAC_NAME):Q').scale(zero=False)
+    alt.Y('count(FAC_NAME):Q')
 )
 plot_1_3
 ```
