@@ -41,6 +41,92 @@ Please refer to the minilesson on code style
 
 **Important:** Repositories are for tracking code. **Do not commit the data or shapefiles to your repo.** The best way to do this is with `.gitignore`, which we have covered in class. If you do accidentally commit the data, Github has a [guide](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github#removing-files-from-a-repositorys-history). The best course of action depends on whether you have pushed yet. This also means that both partners will have to download the initial raw data and any data cleaning code will need to be re-run on both partners' computers. 
 
+
+```{python}
+#import libraries
+import pandas as pd
+import altair as alt
+import shapely
+from shapely import Polygon, Point
+```
+**Question 1.2**
+```{python}
+pos2016=pd.read_csv(r'C:\Users\laine\OneDrive\Documents\Harris\Fall 2024\Python II\pos2016.csv')
+```
+
+```{python}
+short_term_hos_2016=pos2016[pos2016['PRVDR_CTGRY_CD']==1]
+short_term_hos_2016=short_term_hos_2016[short_term_hos_2016['PRVDR_CTGRY_SBTYP_CD']==1]
+short_term_hos_2016['year']=2016
+print(len(short_term_hos_2016))
+```
+There are 7245 hospitals reported in this data. This seems very low. The Kaiser Family Foundation article reports that "here are nearly 5,000 short-term, acute care hospitals in the United States". That estimate may be smaller because they are filtering down even further to acute care hospitals. 
+
+Definitive Healthcare reports 3,873 short term acute care hospitals as of April 2024. That estimate is much lower than the estimate from the 2016 data. There may have been many hospital closures since 2016 but it seems unlikely that the number of short term hospitals would decrease by almost 50%. 
+
+Kaiser Family Foundation article: https://www.kff.org/report-section/a-look-at-rural-hospital-closures-and-implications-for-access-to-care-three-case-studies-issue-brief/ 
+
+Definitive Healthcare article: https://www.definitivehc.com/blog/how-many-hospitals-are-in-the-us 
+
+**Question 1.3**
+
+```{python}
+# import and subset pos2017
+pos2017=pd.read_csv(r'C:\Users\laine\OneDrive\Documents\Harris\Fall 2024\Python II\pos2017.csv')
+short_term_hos_2017=pos2017[pos2017['PRVDR_CTGRY_CD']==1]
+short_term_hos_2017=short_term_hos_2017[short_term_hos_2017['PRVDR_CTGRY_SBTYP_CD']==1]
+short_term_hos_2017['year']=2017
+print(len(short_term_hos_2017))
+```
+
+```{python}
+# import and subset pos2018
+pos2018=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\Harris\Fall 2024\Python II\pos2018.csv")
+short_term_hos_2018=pos2018[pos2018['PRVDR_CTGRY_CD']==1]
+short_term_hos_2018=short_term_hos_2018[short_term_hos_2018['PRVDR_CTGRY_SBTYP_CD']==1]
+short_term_hos_2018['year']=2018
+print(len(short_term_hos_2018))
+```
+
+```{python}
+# import and subset pos2018
+pos2019=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\Harris\Fall 2024\Python II\pos2019.csv")
+short_term_hos_2019=pos2019[pos2019['PRVDR_CTGRY_CD']==1]
+short_term_hos_2019=short_term_hos_2019[short_term_hos_2019['PRVDR_CTGRY_SBTYP_CD']==1]
+short_term_hos_2019['year']=2019
+print(len(short_term_hos_2019))
+```
+
+There are 7260 short term hospitals in the 2017 dataset. There are 7277 short term hospitals in the 2018 dataset. There are 7303 short term hospitals in the 2019 dataset. 
+
+
+```{python}
+full_df=pd.concat([short_term_hos_2016,short_term_hos_2017,short_term_hos_2018,short_term_hos_2019])
+```
+
+```{python}
+alt.data_transformers.disable_max_rows()
+plot_1_3=alt.Chart(full_df, title="Number of Short Term Hospitals by Year").mark_bar().encode(
+    alt.X('year:Q'),
+    alt.Y('count(FAC_NAME):Q').scale(zero=False)
+)
+plot_1_3
+```
+**Question 1.4**
+
+
+```{python}
+plot_1_4=alt.Chart(full_df, title="Number of Short Term Unique Hospitals by Year").mark_bar().transform_aggregate(
+    unique_num='count(FAC_NAME)',
+    groupby=['PRVDR_NUM', 'year']
+).encode(
+    alt.X('year:Q'),
+    alt.Y('unique_num:Q').scale(zero=False)
+)
+plot_1_4
+```
+The plot of unique hospitals looks very similar to the first plot. This suggests that there was already only 1 observation for most hospitals/ few if any hospitals had the same CMS certification number. 
+
 ## Download and explore the Provider of Services (POS) file (10 pts)
 
 1. 
