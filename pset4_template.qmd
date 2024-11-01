@@ -290,9 +290,40 @@ census_data.head()
 prefixes=('75', '76', '77', '78', '79')
 census_data['texas']=census_data['ZCTA5'].map(lambda x: 1 if any(str(x).startswith(prefix) for prefix in prefixes)else 0)
 texas_data=census_data[census_data['texas']==1]
+```
+
+```{python}
+zip_counts=(texas_short_term_hos_2016.groupby('ZIP_CD').size())
+count_by_zip=pd.DataFrame({'zip':zip_counts.index, 'count':zip_counts.values})
 
 ```
 
+```{python}
+texas_data=texas_data.dropna(subset='ZCTA5')
+texas_data['ZCTA5']=pd.to_numeric(texas_data['ZCTA5'])
+merged=texas_short_term_hos_2016.merge(texas_data, left_on="ZIP_CD", right_on="ZCTA5")
+merged.head()
+```
+
+```{python}
+texas_merged=merged[merged['texas_x']==1]
+zip_counts=(texas_merged.groupby('ZIP_CD').size())
+grouped=texas_merged.groupby('ZIP_CD')
+geo=grouped['geometry'].first()
+count_by_zip=gpd.GeoDataFrame({'zip':zip_counts.index, 'count':zip_counts.values, 'geometry':geo} )
+count_by_zip.set_geometry('geometry')
+
+```
+
+```{python}
+import matplotlib
+count_by_zip.head()
+counts=count_by_zip.plot(column='count', legend=True).set_axis_off()
+base=count_by_zip.plot(facecolor='none', linewidth=0.2).set_axis_off()
+counts+base
+#still needs to be debugged so they layer on top of each other 
+
+```
 ## Calculate zip code’s distance to the nearest hospital (20 pts) (*)
 
 1. 
