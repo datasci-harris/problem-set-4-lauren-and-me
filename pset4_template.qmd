@@ -28,7 +28,7 @@ Please refer to the minilesson on code style
 1. This problem set is a paired problem set.
 2. Play paper, scissors, rock to determine who goes first. Call that person *Partner 1*.
     - Partner 1 Lauren Laine, llaine:
-    - Partner 2 (name and cnet ID):
+    - Partner 2 (Mohamed, cnet ID: shahim143 ):
 3. Partner 1 will accept the `ps4` and then share the link it creates with their partner. You can only share it with one partner so you will not be able to change it after your partner has accepted. 
 4. "This submission is our work alone and complies with the 30538 integrity policy." Add your initials to indicate your agreement: \*\*\_\_\*\* \*\*\_\_\*\*
 5. "I have uploaded the names of anyone else other than my partner and I worked with on the problem set **[here](https://docs.google.com/forms/d/185usrCREQaUbvAXpWhChkjghdGgmAZXA3lPWpXLLsts/edit)**"  (1 point)
@@ -83,6 +83,7 @@ Definitive Healthcare article: https://www.definitivehc.com/blog/how-many-hospit
 ```{python}
 # import and subset pos2017
 pos2017=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2017.csv")
+
 short_term_hos_2017=pos2017[pos2017['PRVDR_CTGRY_CD']==1]
 short_term_hos_2017=short_term_hos_2017[short_term_hos_2017['PRVDR_CTGRY_SBTYP_CD']==1]
 short_term_hos_2017['year']=2017
@@ -92,6 +93,7 @@ print(len(short_term_hos_2017))
 ```{python}
 # import and subset pos2018
 pos2018=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2018.csv")
+
 short_term_hos_2018=pos2018[pos2018['PRVDR_CTGRY_CD']==1]
 short_term_hos_2018=short_term_hos_2018[short_term_hos_2018['PRVDR_CTGRY_SBTYP_CD']==1]
 short_term_hos_2018['year']=2018
@@ -99,8 +101,9 @@ print(len(short_term_hos_2018))
 ```
 
 ```{python}
-# import and subset pos2018
+# import and subset pos2019
 pos2019=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2019.csv")
+
 short_term_hos_2019=pos2019[pos2019['PRVDR_CTGRY_CD']==1]
 short_term_hos_2019=short_term_hos_2019[short_term_hos_2019['PRVDR_CTGRY_SBTYP_CD']==1]
 short_term_hos_2019['year']=2019
@@ -151,11 +154,108 @@ The unique provider number plot looks almost identical to the plot before filter
 ## Identify hospital closures in POS file (15 pts) (*)
 
 1. 
+```{python}
+list_active_hospitals_2016 = full_df[
+    (full_df['PRVDR_CTGRY_CD'] == 1) & 
+    (full_df['PRVDR_CTGRY_SBTYP_CD'] == 1) & 
+    (full_df['PGM_TRMNTN_CD'] == 0) & 
+    (full_df['year'] == 2016)
+]
+
+providers_active_2016 = list_active_hospitals_2016['PRVDR_NUM'].unique()
+
+closure_records = []
+
+years_to_check = [2017, 2018, 2019]
+
+for provider in providers_active_2016:
+    is_closed = True
+    year_of_close = None
+    
+    for year in years_to_check:
+        yearly_data = full_df[
+            (full_df['PRVDR_NUM'] == provider) & 
+            (full_df['PRVDR_CTGRY_CD'] == 1) & 
+            (full_df['PRVDR_CTGRY_SBTYP_CD'] == 1) & 
+            (full_df['year'] == year)
+        ]
+        
+        if not yearly_data.empty and yearly_data['PGM_TRMNTN_CD'].values[0] == 0:
+            is_closed = False
+            break
+        elif not yearly_data.empty:
+            year_of_close = year
+    
+    if is_closed:
+        hospital_info = list_active_hospitals_2016[list_active_hospitals_2016['PRVDR_NUM'] == provider].iloc[0]
+        closure_records.append({
+            'FAC_NAME': hospital_info['FAC_NAME'],
+            'ZIP_CD': hospital_info['ZIP_CD'],
+            'closure_year': year_of_close
+        })
+
+closures_data = pd.DataFrame(closure_records)
+
+total_closures_by_2019 = closures_data.shape[0]
+print(f"Total suspected closures by 2019: {total_closures_by_2019}")
+```
+
+'''
+List of hospitals are there that fit this definition are 40
+'''
 2. 
+```{python}
+sorted_closures_data = closures_data.sort_values(by='FAC_NAME')[['FAC_NAME', 'closure_year']]
+
+sorted_closures_data.head(10)
+
+```
+
 3. 
     a.
+```{python}
+active_hospitals_by_zip_year = full_df[(full_df['PGM_TRMNTN_CD'] == 0) & 
+                                       (full_df['PRVDR_CTGRY_CD'] == 1) & 
+                                       (full_df['PRVDR_CTGRY_SBTYP_CD'] == 1)]
+active_ones = active_hospitals_by_zip_year.groupby(['ZIP_CD', 'year']).size().reset_index(name='active_count')
+
+closures_data = closures_data.merge(active_ones, left_on=['ZIP_CD', 'closure_year'], right_on=['ZIP_CD', 'year'], how='left')
+closures_data = closures_data.rename(columns={'active_count': 'closure_year_active_count'})
+
+closures_data = closures_data.merge(
+    active_ones,
+    left_on=['ZIP_CD', 'closure_year'],
+    right_on=['ZIP_CD', 'year'],
+    suffixes=('', '_next'),
+    how='left'
+)
+closures_data = closures_data.rename(columns={'active_count': 'next_year_active_count'})
+
+closures_data['potential_acquisition_merger'] = closures_data['next_year_active_count'] >= closures_data['closure_year_active_count']
+
+potential_acquisition_mergers = closures_data[closures_data['potential_acquisition_merger']].copy()
+potential_acquisition_merger_count = potential_acquisition_mergers.shape[0]
+
+print(f"Number of hospitals potentially closed due to mergers/acquisitions: {potential_acquisition_merger_count}")
+
+```
+
     b.
+```{python}
+corrected_closures_data = closures_data[~closures_data['potential_acquisition_merger']]
+
+remaining_closures_count = corrected_closures_data.shape[0]
+print(f"Number of suspected closures after correcting for mergers/acquisitions: {remaining_closures_count}")
+
+```
+
     c.
+```{python}
+sorted_corrected_closures = corrected_closures_data.sort_values(by='FAC_NAME')[['FAC_NAME', 'ZIP_CD', 'closure_year']]
+
+sorted_corrected_closures.head(10)
+
+```
 
 ## Download Census zip code shapefile (10 pt) 
 
