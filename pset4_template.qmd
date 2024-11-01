@@ -128,6 +128,8 @@ plot_1_3
 **Question 1.4**
 
 ```{python}
+#learned about the drop_duplicates function 
+#https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.drop_duplicates.html
 unique_nums2016=short_term_hos_2016.drop_duplicates(subset='PRVDR_NUM', keep='first')
 # check if duplicates were dropped
 unique_nums2016.groupby('PRVDR_NUM').size().head(15)
@@ -158,10 +160,38 @@ The unique provider number plot looks almost identical to the plot before filter
 ## Download Census zip code shapefile (10 pt) 
 
 1. 
-    a. The file types are .dft, .prj, .shp, .shx, and .xml.
+    a. 
+    The file types are .dbf, .prj, .shp, .shx, and .xml.
+    The .dbf file has attribute information 
+    The .prj file describes the Coordinate Reference System.
+    The .shp has feature geometrics.
+    The .shx has a positional index. 
+    The .xml file has details on where the data was obtained, and how often it is updated, and other notes on data use. 
+
 
     b. 
+    The .dbf file is 6,275 KB
+    The .prj file is 1 KB
+    The .shp file is 817,915 KB
+    The .shx file is 259 KB
+    The .xml file is 16 KB
+
 2. 
+
+```{python}
+import geopandas as gpd
+census_data=gpd.read_file(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\gz_2010_us_860_00_500k.shp")
+```
+
+```{python}
+census_data.head()
+# used ChatGPT to Debug and filter to multipel prefixes. 
+#prompt "How can I filter to multiple startswith strings"
+prefixes=('75', '76', '77', '78', '79')
+census_data['texas']=census_data['ZCTA5'].map(lambda x: 1 if any(str(x).startswith(prefix) for prefix in prefixes)else 0)
+texas_data=census_data[census_data['texas']==1]
+
+```
 
 ## Calculate zip code’s distance to the nearest hospital (20 pts) (*)
 
