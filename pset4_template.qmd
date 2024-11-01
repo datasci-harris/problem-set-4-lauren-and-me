@@ -128,16 +128,24 @@ plot_1_3
 **Question 1.4**
 
 ```{python}
-plot_1_4=alt.Chart(full_df, title="Number of Short Term Unique Hospitals by Year").mark_bar().transform_aggregate(
-    unique_num='count(FAC_NAME)',
-    groupby=['PRVDR_NUM', 'year']
-).encode(
-    alt.X('year:Q'),
-    alt.Y('unique_num:Q').scale(zero=False)
-)
-plot_1_4
+unique_nums2016=short_term_hos_2016.drop_duplicates(subset='PRVDR_NUM', keep='first')
+# check if duplicates were dropped
+unique_nums2016.groupby('PRVDR_NUM').size().head(15)
+unique_nums2017=full_df[full_df['year']==2017].drop_duplicates(subset='PRVDR_NUM', keep='first')
+unique_nums2018=full_df[full_df['year']==2018].drop_duplicates(subset='PRVDR_NUM', keep='first')
+unique_nums2019=full_df[full_df['year']==2019].drop_duplicates(subset='PRVDR_NUM', keep='first')
+full_unique_nums=pd.concat([unique_nums2016, unique_nums2017, unique_nums2018, unique_nums2019])
 ```
-The plot of unique hospitals looks very similar to the first plot. This suggests that there was already only 1 observation for most hospitals/ few if any hospitals had the same CMS certification number. 
+
+```{python}
+unique_hos_plot=alt.Chart(full_unique_nums).mark_bar().encode(
+    alt.X('year').title("Year"),
+    alt.Y('count(FAC_NAME):Q').title("Number of Observations")
+)
+unique_hos_plot
+```
+The unique provider number plot looks almost identical to the plot before filtering out duplicates. This suggests that almost all of the hospitals already had a unique provider number. 
+
 ## Identify hospital closures in POS file (15 pts) (*)
 
 1. 
@@ -150,7 +158,8 @@ The plot of unique hospitals looks very similar to the first plot. This suggests
 ## Download Census zip code shapefile (10 pt) 
 
 1. 
-    a.
+    a. The file types are .dft, .prj, .shp, .shx, and .xml.
+
     b. 
 2. 
 
