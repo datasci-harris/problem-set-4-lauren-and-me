@@ -426,3 +426,7 @@ merge_closures.head()
 merge_closures.plot(column='status', legend=True).set_axis_off()
 ```
 ## Reflecting on the exercise (10 pts) 
+Partner 1:
+While it makes sense to suspect that if the number of active hospitals didn't decrease, then the hospital was involved in a merger, this doesn't necessarily have to be the case. A hospital's closure could be announced some time before the closure actually takes place, and a new hospital could come in to fill demand. A new hospital could have come in to the zipcode at the same time that another closed, but with the first pass method this would be interpretted as the old hospital being aquired in a merger not a new one taking it's place. 
+
+Once we have the list of suspected closures, I think it would be worth the time to check the facilitiy names of before and after the suspected closures to see if there are names that are slightly changed. Ex: OSF St. Mary to Carle St. Mary. Since there is a relatively short list of hospitals suspected of being involved in a merger (13) it wouldn't take too much time to just Google the hospital individually to see if there are any reports of a closure or merger.
