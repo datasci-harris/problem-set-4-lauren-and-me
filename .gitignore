@@ -1,9 +1,5 @@
 *zip
-*dbf
-*prj
-*shp
-*shx
-*xml
+
 
 # Ignore CSV files
 *csv
