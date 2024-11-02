@@ -1,9 +1,5 @@
 *zip
-*dpf
-*prj
-*shp
-*shx
-*xml
+
 
 # Ignore CSV files
 full_unique_nums.csv
