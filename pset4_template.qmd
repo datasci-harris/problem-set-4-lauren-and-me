@@ -293,31 +293,48 @@ texas_data=census_data[census_data['texas']==1]
 ```
 
 ```{python}
-texas_data['ZCTA5']=pd.to_numeric(texas_data['ZCTA5'])
-texas_data=texas_data[['ZCTA5', 'geometry']]
+geometry=texas_data[['ZCTA5', 'geometry']]
+geometry.dtypes
+geometry=geometry.dropna()
+geometry['ZCTA5']=pd.to_numeric(geometry['ZCTA5'])
+geometry.dtypes
+```
+#check geometry 
+```{python}
+import matplotlib as plt
+geometry.plot(facecolor='none').set_axis_off()
 
 ```
 
 ```{python}
-zip_counts=short_term_hos_2016['ZIP_CD'].value_counts().reindex(short_term_hos_2016.ZIP_CD.unique(), fill_value=0)
-texas_data.dtypes
-zip_counts=zip_counts.reset_index()
-zip_counts.dtypes
-zip_counts['ZIP_CD']=zip_counts['ZIP_CD'].map(NotImplementedError)
+counts=short_term_hos_2016['ZIP_CD'].value_counts()
+counts=counts.reset_index()
+counts['ZIP_CD']=counts['ZIP_CD'].map(int)
+counts.dtypes
 ```
+
+
 ```{python}
-merged=texas_data.merge(zip_counts, left_on="ZCTA5", right_on="ZIP_CD", how='left')
-merged.head()
-merged.fillna(0)
+#merge
+merge=geometry.merge(counts, left_on='ZCTA5', right_on='ZIP_CD', how='left')
+merge=merge.fillna(0)
+merge=gpd.GeoDataFrame(merge, geometry='geometry')
 ```
+
 ```{python}
-import matplotlib
-counts=merged.plot(column='count', legend=True, linewidth=0.2, vmin=0).set_axis_off()
-counts
+#plot
+plot=merge.plot()
 ```
- 
+
+```{python}
+plot=merge.plot(column='count', legend=True).set_axis_off()
+
+
 
 ```
+
+
+
 ## Calculate zip code’s distance to the nearest hospital (20 pts) (*)
 
 1. 
@@ -334,7 +351,32 @@ counts
 ## Effects of closures on access in Texas (15 pts)
 
 1. 
+
+```{python}
+sorted_corrected_closures.head()
+closures_by_zip=sorted_corrected_closures.groupby('ZIP_CD').size()
+closures_by_zip=closures_by_zip.reset_index()
+closures_by_zip.head()
+
+closures_by_zip['texas']=closures_by_zip['ZIP_CD'].map(lambda x:1 if any(str(x).startswith(prefix)for prefix in prefixes)else 0)
+closures_by_zip_texas=closures_by_zip[closures_by_zip['texas']==1]
+
+closures_by_zip_texas.columns=['ZIP_CD', 'Closures', 'Texas']
+print(closures_by_zip_texas)
+```
+
 2. 
+```{python}
+geometry=texas_data
+merge_closures=geometry.merge(closures_by_zip_texas, left_on="ZCTA5", right_on='ZIP_CD')
+merge_closures.head(15)
+```
+
+```{python}
+texas_closures=merge_closures.plot(column='Closures', legend=True).set_axis_off()
+test=texas_data.plot(facecolor='none', linewidth=0.2).set_axis_off()
+test
+```
 3. 
 4. 
 
