@@ -583,6 +583,7 @@ While it makes sense to suspect that if the number of active hospitals didn't de
 
 Once we have the list of suspected closures, I think it would be worth the time to check the facilitiy names of before and after the suspected closures to see if there are names that are slightly changed. Ex: OSF St. Mary to Carle St. Mary. Since there is a relatively short list of hospitals suspected of being involved in a merger (13) it wouldn't take too much time to just Google the hospital individually to see if there are any reports of a closure or merger.
 
+
 Partner 2:
 The existing approach to pinpoint ZIP codes impacted by hospital shutdowns, which relies on the cessation of hospital operations between 2016 and 2019, offers a fundamental insight into access alterations. Nonetheless, it simplifies the effect on healthcare availability by assuming all closures are the same and not considering variables like the number of hospitals in each ZIP code, distance to hospitals in adjacent ZIP codes, or population density.
 
