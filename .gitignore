@@ -1,9 +1,5 @@
 *zip
-gz_2010_us_860_00_500k.xml
-gz_2010_us_860_00_500k.prj
-gz_2010_us_860_00_500k.shp
-gz_2010_us_860_00_500k.shx
-gz_2010_us_860_00_500k.dbf
+
 
 # Ignore CSV files
-full_unique_nums.csv
+*csv

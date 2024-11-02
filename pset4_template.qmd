@@ -48,10 +48,17 @@ Please refer to the minilesson on code style
 ## Download and explore the Provider of Services (POS) file (10 pts)
 
 1. 
+I pulled
+PRVDR_CTGRY_CD: provider category
+PRVDR_CTGRY_SBTYP_CD: provider category subtype
+PRVDR_NUM: CMS provider certification number
+PGM_TRMNTN_CD: termination Code 
+FAC_NAME: facility name
+ZIP_CD: facility zip code
+
 2. 
     a.
-    b.
-
+    
 ```{python}
 #import libraries
 import pandas as pd
@@ -59,9 +66,9 @@ import altair as alt
 import shapely
 from shapely import Polygon, Point
 ```
-**Question 1.2**
+
 ```{python}
-pos2016 = pd.read_csv("C:\\Users\\mmmoh\\DPPS Python\\PSet\\problem-set-4-lauren-and-me\\pos2016.csv")
+pos2016=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2016.csv")
 ```
 
 ```{python}
@@ -70,19 +77,20 @@ short_term_hos_2016=short_term_hos_2016[short_term_hos_2016['PRVDR_CTGRY_SBTYP_C
 short_term_hos_2016['year']=2016
 print(len(short_term_hos_2016))
 ```
-There are 7245 hospitals reported in this data. This seems very low. The Kaiser Family Foundation article reports that "here are nearly 5,000 short-term, acute care hospitals in the United States". That estimate may be smaller because they are filtering down even further to acute care hospitals. 
+There are 7245 hospitals reported in this data. This seems very low.
+    b.
+ The Kaiser Family Foundation article reports that "here are nearly 5,000 short-term, acute care hospitals in the United States". That estimate may be smaller because they are filtering down even further to acute care hospitals. 
 
 Definitive Healthcare reports 3,873 short term acute care hospitals as of April 2024. That estimate is much lower than the estimate from the 2016 data. There may have been many hospital closures since 2016 but it seems unlikely that the number of short term hospitals would decrease by almost 50%. 
 
 Kaiser Family Foundation article: https://www.kff.org/report-section/a-look-at-rural-hospital-closures-and-implications-for-access-to-care-three-case-studies-issue-brief/ 
 
 Definitive Healthcare article: https://www.definitivehc.com/blog/how-many-hospitals-are-in-the-us 
-3. 
-**Question 1.3**
 
+3. 
 ```{python}
 # import and subset pos2017
-pos2017 = pd.read_csv("C:\\Users\\mmmoh\\DPPS Python\\PSet\\problem-set-4-lauren-and-me\\pos2017.csv")
+pos2017=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2017.csv")
 
 short_term_hos_2017=pos2017[pos2017['PRVDR_CTGRY_CD']==1]
 short_term_hos_2017=short_term_hos_2017[short_term_hos_2017['PRVDR_CTGRY_SBTYP_CD']==1]
@@ -92,7 +100,7 @@ print(len(short_term_hos_2017))
 
 ```{python}
 # import and subset pos2018
-pos2018 = pd.read_csv("C:\\Users\\mmmoh\\DPPS Python\\PSet\\problem-set-4-lauren-and-me\\pos2018.csv")
+pos2018=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2018.csv")
 
 short_term_hos_2018=pos2018[pos2018['PRVDR_CTGRY_CD']==1]
 short_term_hos_2018=short_term_hos_2018[short_term_hos_2018['PRVDR_CTGRY_SBTYP_CD']==1]
@@ -102,7 +110,7 @@ print(len(short_term_hos_2018))
 
 ```{python}
 # import and subset pos2019
-pos2019 = pd.read_csv("C:\\Users\\mmmoh\\DPPS Python\\PSet\\problem-set-4-lauren-and-me\\pos2019.csv")
+pos2019=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2019.csv")
 
 short_term_hos_2019=pos2019[pos2019['PRVDR_CTGRY_CD']==1]
 short_term_hos_2019=short_term_hos_2019[short_term_hos_2019['PRVDR_CTGRY_SBTYP_CD']==1]
@@ -120,16 +128,13 @@ full_df=pd.concat([short_term_hos_2016,short_term_hos_2017,short_term_hos_2018,s
 ```{python}
 alt.data_transformers.disable_max_rows()
 plot_1_3=alt.Chart(full_df, title="Number of Short Term Hospitals by Year").mark_bar().encode(
-    alt.X('year:Q'),
+    alt.X('year:O'),
     alt.Y('count(FAC_NAME):Q')
 )
 plot_1_3
 ```
 4. 
     a.
-    b.
-**Question 1.4**
-
 ```{python}
 #learned about the drop_duplicates function 
 #https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.drop_duplicates.html
@@ -141,32 +146,29 @@ unique_nums2018=full_df[full_df['year']==2018].drop_duplicates(subset='PRVDR_NUM
 unique_nums2019=full_df[full_df['year']==2019].drop_duplicates(subset='PRVDR_NUM', keep='first')
 full_unique_nums=pd.concat([unique_nums2016, unique_nums2017, unique_nums2018, unique_nums2019])
 ```
-
 ```{python}
 unique_hos_plot=alt.Chart(full_unique_nums).mark_bar().encode(
-    alt.X('year').title("Year"),
+    alt.X('year:O').title("Year"),
     alt.Y('count(FAC_NAME):Q').title("Number of Observations")
 )
 unique_hos_plot
 ```
+    b.
+
 The unique provider number plot looks almost identical to the plot before filtering out duplicates. This suggests that almost all of the hospitals already had a unique provider number. 
 
 ## Identify hospital closures in POS file (15 pts) (*)
 
-```{python}
-# Save full_unique_nums DataFrame to a CSV file
-full_unique_nums.to_csv('full_unique_nums.csv', index=False)
-```
-
 1. 
 ```{python}
-list_active_hospitals_2016 = full_unique_nums[
-    (full_unique_nums['PRVDR_CTGRY_CD'] == 1) & 
-    (full_unique_nums['PRVDR_CTGRY_SBTYP_CD'] == 1) & 
-    (full_unique_nums['year'] == 2016)
+list_active_hospitals_2016 = full_df[
+    (full_df['PRVDR_CTGRY_CD'] == 1) & 
+    (full_df['PRVDR_CTGRY_SBTYP_CD'] == 1) & 
+    (full_df['PGM_TRMNTN_CD'] == 0) & 
+    (full_df['year'] == 2016)
 ]
 
-providers_active_2016 = list_active_hospitals_2016['FAC_NAME'].unique()
+providers_active_2016 = list_active_hospitals_2016['PRVDR_NUM'].unique()
 
 closure_records = []
 
@@ -177,21 +179,21 @@ for provider in providers_active_2016:
     year_of_close = None
     
     for year in years_to_check:
-        yearly_data = full_unique_nums[
-            (full_unique_nums['FAC_NAME'] == provider) & 
-            (full_unique_nums['PRVDR_CTGRY_CD'] == 1) & 
-            (full_unique_nums['PRVDR_CTGRY_SBTYP_CD'] == 1) & 
-            (full_unique_nums['year'] == year)
+        yearly_data = full_df[
+            (full_df['PRVDR_NUM'] == provider) & 
+            (full_df['PRVDR_CTGRY_CD'] == 1) & 
+            (full_df['PRVDR_CTGRY_SBTYP_CD'] == 1) & 
+            (full_df['year'] == year)
         ]
         
-        if not yearly_data.empty and 'CLOSED' not in yearly_data['FAC_NAME'].values[0]:
+        if not yearly_data.empty and yearly_data['PGM_TRMNTN_CD'].values[0] == 0:
             is_closed = False
             break
         elif not yearly_data.empty:
             year_of_close = year
     
     if is_closed:
-        hospital_info = list_active_hospitals_2016[list_active_hospitals_2016['FAC_NAME'] == provider].iloc[0]
+        hospital_info = list_active_hospitals_2016[list_active_hospitals_2016['PRVDR_NUM'] == provider].iloc[0]
         closure_records.append({
             'FAC_NAME': hospital_info['FAC_NAME'],
             'ZIP_CD': hospital_info['ZIP_CD'],
@@ -205,7 +207,7 @@ print(f"Total suspected closures by 2019: {total_closures_by_2019}")
 ```
 
 '''
-List of hospitals are there that fit this definition are 166
+List of hospitals are there that fit this definition are 40
 '''
 2. 
 ```{python}
@@ -218,9 +220,9 @@ sorted_closures_data.head(10)
 3. 
     a.
 ```{python}
-active_hospitals_by_zip_year = full_unique_nums[(full_unique_nums['PGM_TRMNTN_CD'] == 0) & 
-                                       (full_unique_nums['PRVDR_CTGRY_CD'] == 1) & 
-                                       (full_unique_nums['PRVDR_CTGRY_SBTYP_CD'] == 1)]
+active_hospitals_by_zip_year = full_df[(full_df['PGM_TRMNTN_CD'] == 0) & 
+                                       (full_df['PRVDR_CTGRY_CD'] == 1) & 
+                                       (full_df['PRVDR_CTGRY_SBTYP_CD'] == 1)]
 active_ones = active_hospitals_by_zip_year.groupby(['ZIP_CD', 'year']).size().reset_index(name='active_count')
 
 closures_data = closures_data.merge(active_ones, left_on=['ZIP_CD', 'closure_year'], right_on=['ZIP_CD', 'year'], how='left')
@@ -284,7 +286,7 @@ sorted_corrected_closures.head(10)
 
 ```{python}
 import geopandas as gpd
-census_data=gpd.read_file("C:\\Users\\mmmoh\\DPPS Python\\PSet\\problem-set-4-lauren-and-me\\gz_2010_us_860_00_500k.dbf")
+census_data=gpd.read_file(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\gz_2010_us_860_00_500k.shp")
 ```
 
 ```{python}
@@ -337,7 +339,32 @@ plot=merge.plot(column='count', legend=True).set_axis_off()
 ## Calculate zip code’s distance to the nearest hospital (20 pts) (*)
 
 1. 
+
+```{python}
+census_data
+zips_all_centroids=census_data
+zips_all_centroids['centroid']=zips_all_centroids.centroid
+zips_all_centroids.shape
+zips_all_centroids.head()
+```
+The resulting dataframe as 33,120 rows and 8 columns. 
+
+The columns are
+GEO_ID: Geographic Identifier- Fully Concatenated Geographic Code
+ZCTA5: Five digit zipcode
+NAME: Base Name with Translated Legal/Statistical Area Description (the same as ZCTA5)
+LSAD: Legal Statistical Area Description
+CENSUSAREA:
+geometry: the polygon or multipolygon for each zipcode
+texax: The indicator variable I created that shows 1 if the zipcode is in texas and 0 otherwise
+centroid: the centroid of the zipcode
+Source for column definitions: https://tigerweb.geo.census.gov/tigerwebmain/TIGERweb_attribute_glossary.html 
+
 2. 
+
+```{python}
+
+```
 3. 
 4. 
     a.
@@ -430,3 +457,7 @@ merge_closures.head()
 merge_closures.plot(column='status', legend=True).set_axis_off()
 ```
 ## Reflecting on the exercise (10 pts) 
+Partner 1:
+While it makes sense to suspect that if the number of active hospitals didn't decrease, then the hospital was involved in a merger, this doesn't necessarily have to be the case. A hospital's closure could be announced some time before the closure actually takes place, and a new hospital could come in to fill demand. A new hospital could have come in to the zipcode at the same time that another closed, but with the first pass method this would be interpretted as the old hospital being aquired in a merger not a new one taking it's place. 
+
+Once we have the list of suspected closures, I think it would be worth the time to check the facilitiy names of before and after the suspected closures to see if there are names that are slightly changed. Ex: OSF St. Mary to Carle St. Mary. Since there is a relatively short list of hospitals suspected of being involved in a merger (13) it wouldn't take too much time to just Google the hospital individually to see if there are any reports of a closure or merger.
