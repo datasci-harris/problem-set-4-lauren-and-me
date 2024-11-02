@@ -61,7 +61,7 @@ from shapely import Polygon, Point
 ```
 **Question 1.2**
 ```{python}
-pos2016=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2016.csv")
+pos2016 = pd.read_csv("C:\\Users\\mmmoh\\DPPS Python\\PSet\\problem-set-4-lauren-and-me\\pos2016.csv")
 ```
 
 ```{python}
@@ -82,7 +82,7 @@ Definitive Healthcare article: https://www.definitivehc.com/blog/how-many-hospit
 
 ```{python}
 # import and subset pos2017
-pos2017=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2017.csv")
+pos2017 = pd.read_csv("C:\\Users\\mmmoh\\DPPS Python\\PSet\\problem-set-4-lauren-and-me\\pos2017.csv")
 
 short_term_hos_2017=pos2017[pos2017['PRVDR_CTGRY_CD']==1]
 short_term_hos_2017=short_term_hos_2017[short_term_hos_2017['PRVDR_CTGRY_SBTYP_CD']==1]
@@ -92,7 +92,7 @@ print(len(short_term_hos_2017))
 
 ```{python}
 # import and subset pos2018
-pos2018=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2018.csv")
+pos2018 = pd.read_csv("C:\\Users\\mmmoh\\DPPS Python\\PSet\\problem-set-4-lauren-and-me\\pos2018.csv")
 
 short_term_hos_2018=pos2018[pos2018['PRVDR_CTGRY_CD']==1]
 short_term_hos_2018=short_term_hos_2018[short_term_hos_2018['PRVDR_CTGRY_SBTYP_CD']==1]
@@ -102,7 +102,7 @@ print(len(short_term_hos_2018))
 
 ```{python}
 # import and subset pos2019
-pos2019=pd.read_csv(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\pos2019.csv")
+pos2019 = pd.read_csv("C:\\Users\\mmmoh\\DPPS Python\\PSet\\problem-set-4-lauren-and-me\\pos2019.csv")
 
 short_term_hos_2019=pos2019[pos2019['PRVDR_CTGRY_CD']==1]
 short_term_hos_2019=short_term_hos_2019[short_term_hos_2019['PRVDR_CTGRY_SBTYP_CD']==1]
@@ -153,16 +153,20 @@ The unique provider number plot looks almost identical to the plot before filter
 
 ## Identify hospital closures in POS file (15 pts) (*)
 
+```{python}
+# Save full_unique_nums DataFrame to a CSV file
+full_unique_nums.to_csv('full_unique_nums.csv', index=False)
+```
+
 1. 
 ```{python}
-list_active_hospitals_2016 = full_df[
-    (full_df['PRVDR_CTGRY_CD'] == 1) & 
-    (full_df['PRVDR_CTGRY_SBTYP_CD'] == 1) & 
-    (full_df['PGM_TRMNTN_CD'] == 0) & 
-    (full_df['year'] == 2016)
+list_active_hospitals_2016 = full_unique_nums[
+    (full_unique_nums['PRVDR_CTGRY_CD'] == 1) & 
+    (full_unique_nums['PRVDR_CTGRY_SBTYP_CD'] == 1) & 
+    (full_unique_nums['year'] == 2016)
 ]
 
-providers_active_2016 = list_active_hospitals_2016['PRVDR_NUM'].unique()
+providers_active_2016 = list_active_hospitals_2016['FAC_NAME'].unique()
 
 closure_records = []
 
@@ -173,21 +177,21 @@ for provider in providers_active_2016:
     year_of_close = None
     
     for year in years_to_check:
-        yearly_data = full_df[
-            (full_df['PRVDR_NUM'] == provider) & 
-            (full_df['PRVDR_CTGRY_CD'] == 1) & 
-            (full_df['PRVDR_CTGRY_SBTYP_CD'] == 1) & 
-            (full_df['year'] == year)
+        yearly_data = full_unique_nums[
+            (full_unique_nums['FAC_NAME'] == provider) & 
+            (full_unique_nums['PRVDR_CTGRY_CD'] == 1) & 
+            (full_unique_nums['PRVDR_CTGRY_SBTYP_CD'] == 1) & 
+            (full_unique_nums['year'] == year)
         ]
         
-        if not yearly_data.empty and yearly_data['PGM_TRMNTN_CD'].values[0] == 0:
+        if not yearly_data.empty and 'CLOSED' not in yearly_data['FAC_NAME'].values[0]:
             is_closed = False
             break
         elif not yearly_data.empty:
             year_of_close = year
     
     if is_closed:
-        hospital_info = list_active_hospitals_2016[list_active_hospitals_2016['PRVDR_NUM'] == provider].iloc[0]
+        hospital_info = list_active_hospitals_2016[list_active_hospitals_2016['FAC_NAME'] == provider].iloc[0]
         closure_records.append({
             'FAC_NAME': hospital_info['FAC_NAME'],
             'ZIP_CD': hospital_info['ZIP_CD'],
@@ -201,7 +205,7 @@ print(f"Total suspected closures by 2019: {total_closures_by_2019}")
 ```
 
 '''
-List of hospitals are there that fit this definition are 40
+List of hospitals are there that fit this definition are 166
 '''
 2. 
 ```{python}
@@ -214,9 +218,9 @@ sorted_closures_data.head(10)
 3. 
     a.
 ```{python}
-active_hospitals_by_zip_year = full_df[(full_df['PGM_TRMNTN_CD'] == 0) & 
-                                       (full_df['PRVDR_CTGRY_CD'] == 1) & 
-                                       (full_df['PRVDR_CTGRY_SBTYP_CD'] == 1)]
+active_hospitals_by_zip_year = full_unique_nums[(full_unique_nums['PGM_TRMNTN_CD'] == 0) & 
+                                       (full_unique_nums['PRVDR_CTGRY_CD'] == 1) & 
+                                       (full_unique_nums['PRVDR_CTGRY_SBTYP_CD'] == 1)]
 active_ones = active_hospitals_by_zip_year.groupby(['ZIP_CD', 'year']).size().reset_index(name='active_count')
 
 closures_data = closures_data.merge(active_ones, left_on=['ZIP_CD', 'closure_year'], right_on=['ZIP_CD', 'year'], how='left')
@@ -280,7 +284,7 @@ sorted_corrected_closures.head(10)
 
 ```{python}
 import geopandas as gpd
-census_data=gpd.read_file(r"C:\Users\laine\OneDrive\Documents\GitHub\problem-set-4-lauren-and-me\gz_2010_us_860_00_500k.shp")
+census_data=gpd.read_file("C:\\Users\\mmmoh\\DPPS Python\\PSet\\problem-set-4-lauren-and-me\\gz_2010_us_860_00_500k.dbf")
 ```
 
 ```{python}
@@ -426,7 +430,3 @@ merge_closures.head()
 merge_closures.plot(column='status', legend=True).set_axis_off()
 ```
 ## Reflecting on the exercise (10 pts) 
-Partner 1:
-While it makes sense to suspect that if the number of active hospitals didn't decrease, then the hospital was involved in a merger, this doesn't necessarily have to be the case. A hospital's closure could be announced some time before the closure actually takes place, and a new hospital could come in to fill demand. A new hospital could have come in to the zipcode at the same time that another closed, but with the first pass method this would be interpretted as the old hospital being aquired in a merger not a new one taking it's place. 
-
-Once we have the list of suspected closures, I think it would be worth the time to check the facilitiy names of before and after the suspected closures to see if there are names that are slightly changed. Ex: OSF St. Mary to Carle St. Mary. Since there is a relatively short list of hospitals suspected of being involved in a merger (13) it wouldn't take too much time to just Google the hospital individually to see if there are any reports of a closure or merger.
