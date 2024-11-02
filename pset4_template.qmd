@@ -391,13 +391,72 @@ unique_zips_texas_borderstates_centroids.shape
 There are 1935 unique zipcodes in the Texas subset. 
 There are 4018 unique zipcodes in the Texas and bordering states subset. 
 
-
-
-
 3. 
+
+```{python}
+short_term_hos_2016['ZIP_CD']=short_term_hos_2016['ZIP_CD'].map(int)
+zips_texas_borderstates_centroids['ZCTA5']=pd.to_numeric(zips_texas_borderstates_centroids['ZCTA5'])
+zips_withhospital_centroids=short_term_hos_2016.merge(zips_texas_borderstates_centroids, left_on='ZIP_CD', right_on='ZCTA5', how='left')
+zips_withhospital_centroids=gpd.GeoDataFrame(zips_withhospital_centroids,geometry='centroid')
+```
+I choose to use a left merge so that the dataframe would only keep zipcodes contianing hospitals (the pos file was on the left). I merged on the zipcode variable ZIP_CD on the left and ZCTA5 on the right. 
 4. 
     a.
+    
+```{python}
+top_ten=zips_texas_centroids.head(10)
+zips_texas_centroids.set_geometry('centroid')
+```
+
+```{python}
+import time
+start_time=time.time()
+join=gpd.sjoin_nearest(
+    top_ten,
+    zips_withhospital_centroids,
+    how='left',
+    distance_col='distance'
+)
+end_time=time.time()
+```
+
+```{python}
+difference=end_time-start_time
+print(difference)
+```
+The merge took 0.034 ms
+
+```{python}
+total_time=(1935/10)*difference
+print(total_time)
+```
+I estimate it will take 6.53ms to run the entire procedure. 
     b.
+
+```{python}
+start=time.time()
+join=gpd.sjoin_nearest(
+    zips_texas_centroids,
+    zips_withhospital_centroids,
+    how='left',
+    distance_col='distance'
+)
+end=time.time()
+```
+
+```{python}
+diff=end-start
+print(diff)
+```
+The actual time it took was 0.889ms which is considerably less than the estimate. 
+
+c. The unit is degrees. 
+
+```{python}
+def degrees_to_miles(num):
+    conversion=num/69
+    return conversion
+```
 5. 
     a.
     b.
