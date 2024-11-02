@@ -1,5 +1,10 @@
-*zip
+*.zip
+*.shp
+*.xml
+*.dbf
+*.prj
+*.shx
 
 
 # Ignore CSV files
-*csv
+*.csv

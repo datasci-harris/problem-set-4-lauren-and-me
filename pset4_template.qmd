@@ -392,6 +392,8 @@ There are 1935 unique zipcodes in the Texas subset.
 There are 4018 unique zipcodes in the Texas and bordering states subset. 
 
 
+
+
 3. 
 4. 
     a.
