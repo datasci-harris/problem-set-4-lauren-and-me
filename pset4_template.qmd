@@ -307,7 +307,7 @@ geometry.dtypes
 ```
 #check geometry 
 ```{python}
-import matplotlib as plt
+import matplotlib.pyplot as plt
 geometry.plot(facecolor='none').set_axis_off()
 
 ```
@@ -411,7 +411,7 @@ zips_texas_centroids.set_geometry('centroid')
 ```{python}
 import time
 start_time=time.time()
-join=gpd.sjoin_nearest(
+ten_join=gpd.sjoin_nearest(
     top_ten,
     zips_withhospital_centroids,
     how='left',
@@ -454,14 +454,47 @@ c. The unit is degrees.
 
 ```{python}
 def degrees_to_miles(num):
-    conversion=num/69
+    conversion=num*69
     return conversion
 ```
 5. 
     a.
+
+```{python}
+print(join['distance'])
+```
+This distance calculation is in degrees. 
     b.
+
+```{python}
+join['miles']=join['distance'].map(degrees_to_miles)
+ten_join['miles']=ten_join['distance'].map(degrees_to_miles)
+join['miles'].mean()
+```
+The average distance to a hospital in miles from each 4.34. This seems very short.
+
     c.
-    
+
+```{python}
+join.plot().set_axis_off()
+for index, row in join.iterrows():
+    centroid=row['centroid']
+    plt.annotate(text=row['miles'], xy=(centroid.x, centroid.y),
+    ha='center', fontsize=5)
+
+plt.show()
+```
+If we map all the distance for all zipcodes then the map becomes unreadable because the text layers over each other. So, we decided to test using just the first ten zipcodes from zips_texas_centroids. The resulting graph is below. It only shows a portion of the zipcodes in Texas but the labels are readable. 
+```{python}
+ten_join.plot().set_axis_off()
+for index, row in ten_join.iterrows():
+    centroid=row['centroid']
+    plt.annotate(text=row['miles'], xy=(centroid.x, centroid.y),
+    ha='center', fontsize=5)
+
+plt.show()
+```
+
 ## Effects of closures on access in Texas (15 pts)
 
 1. 
@@ -549,3 +582,8 @@ Partner 1:
 While it makes sense to suspect that if the number of active hospitals didn't decrease, then the hospital was involved in a merger, this doesn't necessarily have to be the case. A hospital's closure could be announced some time before the closure actually takes place, and a new hospital could come in to fill demand. A new hospital could have come in to the zipcode at the same time that another closed, but with the first pass method this would be interpretted as the old hospital being aquired in a merger not a new one taking it's place. 
 
 Once we have the list of suspected closures, I think it would be worth the time to check the facilitiy names of before and after the suspected closures to see if there are names that are slightly changed. Ex: OSF St. Mary to Carle St. Mary. Since there is a relatively short list of hospitals suspected of being involved in a merger (13) it wouldn't take too much time to just Google the hospital individually to see if there are any reports of a closure or merger.
+
+Partner 2:
+The existing approach to pinpoint ZIP codes impacted by hospital shutdowns, which relies on the cessation of hospital operations between 2016 and 2019, offers a fundamental insight into access alterations. Nonetheless, it simplifies the effect on healthcare availability by assuming all closures are the same and not considering variables like the number of hospitals in each ZIP code, distance to hospitals in adjacent ZIP codes, or population density.
+
+Way to enhance this is to take into account the number of hospitals within each ZIP code. A closure in a ZIP code containing many hospitals might not have as much of an effect as a closure in an area with just one hospital. Incorporate nearby ZIP codes to evaluate the impact of closures on access in neighboring areas, since patients may go to other ZIP codes for healthcare. Integrate population statistics to more accurately represent the amount of individuals impacted by closures, particularly in heavily populated regions. These enhancements would offer a more detailed understanding of the impact of hospital closures on healthcare accessibility within specific ZIP codes.
